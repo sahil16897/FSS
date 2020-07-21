@@ -1,0 +1,174 @@
+1
+-------
+import static org.junit.Assert.* ;
+import org.junit.Test ;
+import org.junit.Before ;
+
+public class AddressCheckJUnit {
+    AddressCheckBO ab = null ;
+    @Before
+    public void createBoInstance() {
+        //fill the code
+        ab = new AddressCheckBO() ;
+    }
+    @Test
+    public void testCreateAddressObject() {
+        //fill the code
+        Address adr = ab.createAddressObject(1, "a", "b", "c") ;
+        Address adr2 = new Address(1, "a", "b", "c") ;
+        assertEquals(adr.getUserId(), adr2.getUserId());
+        assertEquals(adr.getStreet(), adr2.getStreet());
+        assertEquals(adr.getCity(), adr2.getCity());
+        assertEquals(adr.getState(), adr2.getState());
+    }
+}
+-------------
+2
+--------
+import static org.junit.Assert.* ;
+import static org.hamcrest.CoreMatchers.* ;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import org.junit.Test ;
+import org.junit.Before ;
+import java.util.* ;
+public class EventJUnit {
+    MockEventDAO mo;
+    @Before
+    public void createBoInstance() {
+		mo = new MockEventDAO();
+	}
+	@Test
+	public void testGetAllEvents() {
+		List<Event> li = mo.getAllEvents();
+        assertThat(li, contains(
+            new Event(1, "Event 1", "Organizer 1"),
+            new Event(2, "Event 2", "Organizer 2"),
+            new Event(3, "Event 3", "Organizer 3"),
+            new Event(4, "Event 4", "Organizer 4")));
+	}
+	
+}
+class MockEventDAO extends EventDAO{
+	public List<Event> getAllEvents(){
+        List<Event> al = new ArrayList<Event>();
+        al.add(new Event(1, "Event 1", "Organizer 1"));
+        al.add(new Event(2, "Event 2", "Organizer 2"));
+        al.add(new Event(3, "Event 3", "Organizer 3"));
+        al.add(new Event(4, "Event 4", "Organizer 4"));
+        return al;
+	}
+}
+-------------
+3
+---------
+import static org.junit.Assert.* ;
+import org.junit.Test ;
+import org.junit.Before ;
+import java.util.* ;
+
+public class EventJUnit {
+    EventBO eb = null ;
+    @Before
+	public void createBoInstance() {
+		//fill the code
+        eb = new EventBO() ;
+	}
+    @Test
+	public void testSearchEvents() {
+		//fill the code
+        Event e[] = new Event[5] ;
+        e[0] = new Event("Name1", "Det1", "Type1", "Org1", 12, 100.2) ;
+        e[1] = new Event("Name2", "Det2", "Type1", "Org2", 23, 144.4) ;
+        e[2] = new Event("Name3", "Det3", "Type2", "Org3", 24, 1434.4) ;
+        e[3] = new Event("Name4", "Det4", "Type1", "Org4", 25, 134.4) ;
+        e[4] = new Event("Name5", "Det5", "Type3", "Org5", 26, 1564.4) ;
+        Event e2[] = eb.searchEvents(e, "Type1") ;
+        Event e3[] = new Event[3] ;
+        e3[0] = new Event("Name1", "Det1", "Type1", "Org1", 12, 100.2) ;
+        e3[1] = new Event("Name2", "Det2", "Type1", "Org2", 23, 144.4) ;
+        e3[2] = new Event("Name4", "Det4", "Type1", "Org4", 25, 134.4) ;
+        assertTrue(Arrays.equals(e2, e3)) ;
+	}
+}
+--------
+4
+---
+import static org.junit.Assert.* ;
+import static org.hamcrest.CoreMatchers.* ;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import org.junit.Test ;
+import org.junit.Before ;
+import java.util.* ;
+
+public class ItemTypeJUnit {
+    MockItemTypeDAO dao = null ;
+    @Before
+    public void createBoInstance() {
+        //Fill the code
+        dao = new MockItemTypeDAO() ;
+    }
+    @Test
+    public void testObtainItemTypes() {
+        //Fill the code
+        List<ItemType> li = dao.getAllItemTypes() ;
+        assertThat(li, contains(
+                new ItemType(1L, "A", 2.2, 4.5),
+                new ItemType(2L, "B", 2.2, 4.5),
+                new ItemType(3L, "C", 2.2, 4.5),
+                new ItemType(4L, "D", 2.2, 4.5),
+                new ItemType(5L, "E", 2.2, 4.5)
+        )) ;
+    }
+}
+class MockItemTypeDAO extends ItemTypeDAO{
+    public List<ItemType> getAllItemTypes() {
+        //Fill the code
+        List<ItemType> types = new ArrayList<ItemType>();
+        types.add(new ItemType(1L, "A", 2.2, 4.5)) ;
+        types.add(new ItemType(2L, "B", 2.2, 4.5)) ;
+        types.add(new ItemType(3L, "C", 2.2, 4.5)) ;
+        types.add(new ItemType(4L, "D", 2.2, 4.5)) ;
+        types.add(new ItemType(5L, "E", 2.2, 4.5)) ;
+        return types ;
+    }
+}
+------
+5
+----
+import static org.junit.Assert.* ;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import org.junit.Test ;
+import org.junit.Before ;
+import java.util.* ;
+
+public class UserJUnit {
+
+    MockUserDAO obj = null ;
+    @Before
+    public void createBoInstance() {
+        //fill the code
+        obj = new MockUserDAO() ;
+    }
+    @Test
+    public void testObtainUserList() {
+        //fill the code
+        List<User> li = obj.getAllUsers() ;
+        assertThat(li, contains(
+                new User(1L, "A", "AA" , "AAA", "B"),
+                new User(2L, "B", "BB" , "BBB", "C"),
+                new User(2L, "B", "BB" , "BBB", "C"),
+                new User(2L, "B", "BB" , "BBB", "C")
+        )) ;
+    }
+}
+class MockUserDAO extends UserDAO {
+    public List<User> getAllUsers() {
+        //fill the code
+        List<User> li = new ArrayList<>() ;
+        li.add(new User(1L, "A", "AA" , "AAA", "B")) ;
+        li.add(new User(2L, "B", "BB" , "BBB", "C")) ;
+        li.add(new User(2L, "B", "BB" , "BBB", "C")) ;
+        li.add(new User(2L, "B", "BB" , "BBB", "C")) ;
+        return li ;
+    }
+}

@@ -1,0 +1,379 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static BufferedReader br = null; 
+	static User currentUser = null;
+	static void printMenu() {
+		System.out.println("Welcome to Music Management System\nHow do you want to proceed?\n1. Login\n2. Create new user\n3. Exit\nEnter your choice:");
+	}
+	
+	static void printUserMenu(User user) {
+		System.out.println("\nWelcome " + user.getName() + "\nRole: " + user.getRole() + "\nWhat next?\n1. Add track to my playlist\n2. View my playlist\n3. Logout\n4. Exit\nEnter your choice:");
+	}
+	
+	static Boolean handleMenuChoice(Integer choice) throws Throwable {
+		Boolean proceed = Boolean.TRUE;
+		switch(choice) {
+			case 1:
+				System.out.println("Username:");
+				String username = br.readLine();
+				System.out.println("Password:");
+				String password = br.readLine();
+				// fill code here
+				currentUser=UserBO.validateUser(username,password);
+				if(currentUser==null) {
+					System.out.println("Invalid Username or Password!!!\n");
+				}else {
+					System.out.println("Logged in.");
+				}
+				break;
+				
+			case 2:
+				System.out.println("Creating new User.");
+				System.out.println("Name:");
+				String newName = br.readLine();
+				System.out.println("Username:");
+				String newUsername = br.readLine();
+				if(UserBO.usernameExists(newUsername)) {
+					System.out.println("Username already exists. Retry.");
+					System.out.println("Username:");
+					newUsername = br.readLine();
+					if(UserBO.usernameExists(newUsername)) {
+						System.out.println("Username already exists. Exiting.");
+						proceed = Boolean.FALSE;
+						break;
+					}
+				}
+				System.out.println("Password:");
+				String newPassword = br.readLine();
+				System.out.println("Role(Default- user):\n1. admin\n2. user\nOption:");
+				Integer roleChoice = Integer.parseInt(br.readLine());
+				String newRole = null;
+				switch(roleChoice) {
+					case 1:
+						newRole = "admin";
+						break;
+					case 2:
+					default:
+						newRole = "user";
+				}
+				// fill code here
+                UserBO.createUser(newName,newUsername,newPassword,newRole);
+                currentUser=null;
+				System.out.println();
+				break;
+			case 3:
+				proceed = Boolean.FALSE;
+				break;
+				
+			default:
+				throw new NumberFormatException();
+		}
+		return proceed;
+	}
+	
+	static Boolean handleUserMenuChoice(Integer choice) throws Throwable{
+		Boolean proceed = Boolean.TRUE;
+		switch(choice) {
+			case 1:
+				System.out.println("Track Name:");
+				String newName = br.readLine();
+				System.out.println("Genre:");
+				String newGenre = br.readLine();
+				System.out.println("Language:");
+				String newLanguage = br.readLine();
+				System.out.println("Duration (sec):");
+				Integer newDuration = 0;
+				try {
+					newDuration = Integer.parseInt(br.readLine());					
+				}catch(NumberFormatException e) {
+					System.out.println("Invalid Duration. Re-enter duration.");
+					try {
+						newDuration = Integer.parseInt(br.readLine());
+					}catch(NumberFormatException e2) {
+						System.out.println("Invalid Duration. Exiting.");
+						currentUser = null;
+						break;
+					}
+				}
+				System.out.println("File Url:");
+				String newFileUrl = br.readLine();
+				UserPlaylistBO.addtoPlayList(currentUser,TrackBO.createTrack(newName,newGenre,newLanguage,newDuration,newFileUrl));
+                // fill code here
+				System.out.println("Added track to your playlist.");
+				break;
+			case 2:
+				System.out.println("My Playlist");
+                ArrayList<Track> t=UserPlaylistBO.obtainUserPlaylist(currentUser);
+				if(t==null) System.out.println("No tracks added.");
+                else for(Track obj:t) System.out.println(obj.getName()+" - "+obj.getDur()+"sec");
+                // fill code here
+				break;
+			case 3:
+				System.out.println("Logged out.\n");
+				currentUser = null;
+				break;
+			case 4:
+				proceed = Boolean.FALSE;
+				break;
+			default:
+				throw new NumberFormatException();
+		}
+		return proceed;
+	}
+	
+	public static void main(String[] args) throws Throwable{
+		// TODO Auto-generated method stub
+		Integer choice = 0;
+		br = new BufferedReader(new InputStreamReader(System.in));
+		Boolean proceed = Boolean.TRUE;
+		
+		while(proceed) {
+			printMenu();
+			try {
+				choice = Integer.parseInt(br.readLine());
+				proceed = handleMenuChoice(choice);
+			}catch(NumberFormatException e) {
+				System.out.println("Invalid Choice. Enter your choice:");
+				try {
+					choice = Integer.parseInt(br.readLine());
+					proceed = handleMenuChoice(choice);
+				}catch(NumberFormatException e2) {
+					System.out.println("Invalid Choice. Exiting.");
+					proceed = Boolean.FALSE;
+				}
+                
+			}
+			while(currentUser!=null && proceed) {
+				printUserMenu(currentUser);
+				try {
+					choice = Integer.parseInt(br.readLine());
+					proceed = handleUserMenuChoice(choice);
+				}catch(NumberFormatException e) {
+					System.out.println("Invalid Choice.\nRe-Enter your choice:");
+					try {
+						choice = Integer.parseInt(br.readLine());
+						proceed = handleUserMenuChoice(choice);
+					}catch(NumberFormatException e2) {
+						System.out.println("Invalid Choice. Exiting.");
+						currentUser = null;
+					}
+				}
+			}
+		}
+		System.out.println("\nBye.");
+	}
+}
+
+
+
+import java.util.Date;
+
+public class Playlist {
+    private Long id;
+	private String name;
+	private Date createdDate;
+}
+
+import java.util.*;
+
+public class UserBO {
+    
+	// fill code here
+	static ArrayList<User> l=new ArrayList<>();
+    
+	public static Boolean usernameExists(String username) {
+		// fill code here
+        for(User obj:l)
+        {
+            if(obj.getUname().equals(username)) return true;
+        }
+        return false;
+	}
+	
+	public static User createUser(String name, String username, String password, String role) {
+		// fill code here
+        User u=new User(name,username,password,role);
+        l.add(u);
+        return u;
+	}
+	
+	public static User validateUser(String username, String password) {
+		// fill code here
+        for(User obj:l)
+        {
+            if(obj.getUname().equals(username) && obj.getPass().equals(password)) return obj;
+        }
+        return null;
+	}
+	
+	public static Boolean isAdmin(User userIns) {
+		// fill code here
+        return userIns.getRole().equals("admin");
+	}
+}
+
+
+import java.util.*;
+
+public class TrackBO {
+
+    // fill code here
+
+	public static Track createTrack(String name, String genre, String language, Integer duration, String fileUrl) {
+		// fill code here
+        return new Track(name,genre,language,duration,fileUrl);
+	}
+}
+
+
+public class Track {
+    private Long id;
+	private String name;
+	private String genre;
+	private String language;
+	private Integer	duration;
+	private String fileUrl;
+	
+    
+     Track(String name,String genre,String language,Integer    duration,String fileUrl)
+    {
+        this.name=name;
+        this.genre=genre;
+        this.language=language;
+        this.duration=duration;
+        this.fileUrl=fileUrl;
+    }
+    
+    String getName()
+    {
+        return name;
+    }
+    
+    Integer getDur()
+    {
+        return duration;
+    }
+}
+
+
+import java.util.Date;
+
+public class User {
+    private Long id;
+	private String name;
+	private String username;
+	private String password;
+	private String role;
+	private Date enrolledDate;
+	
+    User(String name,String username,String password,String role)
+    {
+        this.id=id;
+        this.name=name;
+        this.username=username;
+        this.password=password;
+        this.role=role;
+        this.enrolledDate=enrolledDate;
+    }
+    
+    Long getId()
+    {
+        return id;
+    }
+    String getUname()
+    {
+        return username;
+    }
+    String getName()
+    {
+        return name;
+    }
+    String getPass()
+    {
+        return password;
+    }
+    String getRole()
+    {
+        return role;
+    }
+	// fill code here
+	
+}
+
+
+
+
+import java.util.*;
+
+public class UserPlaylistBO {
+    
+	// fill code here
+	static ArrayList<UserPlaylist> l=new ArrayList<>();
+	public static void createUserPlaylist(User user) {
+		// fill code here
+        for(UserPlaylist obj:l)
+        {
+            if(obj.getUser().getUname().equals(user.getUname())) return;
+        }
+        l.add(new UserPlaylist(user));
+        
+	}
+	
+	public static void addtoPlayList(User user, Track track) {
+		// fill code here
+        createUserPlaylist(user);
+        
+        for(UserPlaylist obj:l)
+        {
+            if(obj.getUser().getUname().equals(user.getUname())) obj.addList(track);
+        }
+	}
+	
+	public static ArrayList<Track> obtainUserPlaylist(User user){
+		// fill code here
+        for(UserPlaylist obj:l)
+        {
+            if(obj.getUser().getUname().equals(user.getUname())) return obj.getList();
+        }
+        return null;
+        
+	}
+	
+}
+import java.util.*;
+
+public class UserPlaylist extends Playlist {
+    private User user;
+	private ArrayList<Track> playlist=new ArrayList<Track>();
+	
+    UserPlaylist(User user)
+    {
+        this.user=user;
+    }
+    
+    void setUser(User u)
+    {
+        this.user=u;
+    }
+    
+    void addList(Track u)
+    {
+        this.playlist.add(u);
+    }
+    
+    ArrayList<Track> getList()
+    {
+        return playlist;
+    }
+    User getUser()
+    {
+        return user;
+    }
+    
+	// fill code here
+}
+
+

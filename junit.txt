@@ -1,0 +1,170 @@
+Hey, I just shopped online for free, with my free TPS points. You can too, Enter my referral code I9PVVL while filling out https://thepanelstation.com/ the registration form on The Panel Station and win your starting bonus of 500 points.
+FilterJUnit.java
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FilterJUnit {
+    
+    FilterBO filterBO;
+    
+    @Before
+    public void createBoInstance() {
+        filterBO = new FilterBO();
+    }
+    
+    @Test
+    public void testEvenNum() {
+        int[] output = filterBO.filterEvenNum(new int[]{1,2,3,4,5,6});
+        int[] testAnswer = new int[]{2,4,6};
+        assertEquals(output[1], testAnswer[0]);
+        assertEquals(output[3], testAnswer[1]);
+        assertEquals(output[5], testAnswer[2]);
+    }
+    
+    @Test
+    public void testOddNum() {
+        int[] output = filterBO.filterEvenNum(new int[]{1,2,3,4,5,6});
+        int[] testAnswer = new int[]{1,3,5};
+        assertEquals(output[0], testAnswer[0]);
+        assertEquals(output[2], testAnswer[1]);
+        assertEquals(output[4], testAnswer[2]);
+    }
+    
+}
+
+FilterBO.java
+public class FilterBO {
+    
+    public int[] filterEvenNum(int[] nums) {
+        int count = 0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2==0) {
+                count++;
+            }
+        }
+        int[] even = new int[count];
+        int j=0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2==0) {
+                even[j++] = nums[i];
+            }
+        }
+        return even;
+    }
+    
+    public int[] filterOddNum(int[] nums) {
+        int count = 0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2 != 0) {
+                count++;
+            }
+        }
+        int[] odd = new int[count];
+        int j=0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2 != 0) {
+                odd[j++] = nums[i];
+            }
+        }
+        return odd;
+    }
+    
+}
+
+
+---------------------------------\
+FilterJUnit.java
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+
+public class FilterJUnit {
+    
+    FilterBO filterBO;
+    
+    @Before
+    public void createBoInstance() {
+        filterBO = new FilterBO();
+    }
+    
+    @Test
+    public void testEvenNum() {
+        assertArrayEquals(filterBO.filterEvenNum(new int[]{1,2,3,4,5,6}), new int[]{2,4,6});
+    }
+    
+    @Test
+    public void testOddNum() {
+        assertArrayEquals(filterBO.filterOddNum(new int[]{1,2,3,4,5,6}), new int[]{1,3,5});
+    }
+    
+}
+
+FilterBO.java
+public class FilterBO {
+    
+    public int[] filterEvenNum(int[] nums) {
+        int count = 0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2==0) {
+                count++;
+            }
+        }
+        int[] even = new int[count];
+        int j=0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2==0) {
+                even[j++] = nums[i];
+            }
+        }
+        return even;
+    }
+    
+    public int[] filterOddNum(int[] nums) {
+        int count = 0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2 != 0) {
+                count++;
+            }
+        }
+        int[] odd = new int[count];
+        int j=0;
+        for(int i=0;i<nums.length;i++) {
+            if(nums[i]%2 != 0) {
+                odd[j++] = nums[i];
+            }
+        }
+        return odd;
+    }
+    
+}
+-----------------------------------//
+
+import java.util.*;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+public class ReverseJUnit {
+    ReverseBO rb = null;
+    @Before
+	public void createBoInstance() {
+		rb = new ReverseBO();
+	}
+    @Test
+	public void testReverseUsers() {
+		//fill the code
+        List<User> list1 = Arrays.asList(
+            new User("Jack", "12345", "Jack", "Jack"),
+            new User("Jane", "13579", "Jane", "Jane"),  
+            new User("John", "24680", "John", "John")
+        );
+        
+        List<User> list2 = Arrays.asList(
+            new User("John", "24680", "John", "John"),
+            new User("Jane", "13579", "Jane", "Jane"),
+            new User("Jack", "12345", "Jack", "Jack")                        
+        );
+        
+        assertThat(list1, is(list2));
+	}
+}

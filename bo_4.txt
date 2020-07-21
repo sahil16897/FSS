@@ -1,0 +1,245 @@
+import java.util.*;
+
+public class User {
+	long id;
+    String name, username, password, role;
+    Date enrolled_date;
+    
+    User(long id, String name, String username, String password, String role, Date enrolled_date){
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.enrolled_date = enrolled_date;
+    }
+    
+    public long getId(){
+        return this.id;
+    }
+}
+
+##############################################################################################
+
+import java.util.*;
+
+public class UserPlaylist {
+	Playlist playlist;
+    User user;
+    
+    UserPlaylist(Playlist playlist, User user){
+        this.playlist = playlist;
+        this.user = user;
+    }
+    
+    public User getUser(){
+        return this.user;
+    }
+    
+    public Playlist getPlaylist(){
+        return this.playlist;
+    }
+    
+    
+}
+##########################################################################################
+
+import java.util.*;
+import java.sql.*;
+
+
+public class UserDAO {
+	public User getUser(String username) {
+	    User user = null;
+        
+        try{
+            DbConnection db = new DbConnection();
+            Connection con = db.getConnection();
+            PreparedStatement smt = con.prepareStatement("select * from user where username = ?");
+            smt.setString(1,username);
+            ResultSet rs = smt.executeQuery();
+            while(rs.next()){
+                java.util.Date date = rs.getDate(6);
+                user = new User(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), date); 
+            }
+            
+            con.close();
+        }catch(Exception e){}
+        return user;
+	}
+}
+
+#########################################################################################
+import java.util.*;
+import java.sql.*;
+
+
+public class UserPlaylistDAO {
+	public List<UserPlaylist> getAllPlaylist(User user) throws ClassNotFoundException, SQLException {
+		List<UserPlaylist> list = new ArrayList<>();
+        try{
+            DbConnection db = new DbConnection();
+            Connection con = db.getConnection();
+            PreparedStatement smt = con.prepareStatement("select * from playlist where id in (select playlist_id from user_playlist where user_id = ?)");
+            smt.setLong(1, user.getId());
+            ResultSet rs = smt.executeQuery();
+            while(rs.next()){
+                long id = rs.getLong(1);
+                String name = rs.getString(2);
+                java.util.Date date = rs.getDate(3);
+                
+                Playlist pl = new Playlist(id, name, date);
+                UserPlaylist upl = new UserPlaylist(pl, user);
+                
+                list.add(upl);
+            }
+            
+            con.close();
+        }catch(Exception e){}
+	    
+        return list;
+	}
+	
+	public Boolean deletePlaylist(UserPlaylist playlist) throws ClassNotFoundException, SQLException {
+		
+        try{
+            DbConnection db = new DbConnection();
+            Connection con = db.getConnection();
+            PreparedStatement smt = con.prepareStatement("delete from user_playlist where user_id = ? and playlist_id = ?");
+            smt.setLong(1,playlist.getUser().getId());
+            smt.setLong(2,playlist.getPlaylist().getId());
+            
+            int i = smt.executeUpdate();
+            
+            if(i>0)
+                return true;
+            con.close();
+            
+        }catch(Exception e){}
+		
+        return false;
+		
+	}
+}
+
+######################################################################################
+import java.util.*;
+import java.io.*;
+import java.text.*;
+
+public class Main {
+	public static void main(String args[])throws Exception {
+	    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        
+        System.out.println("Enter the username:");
+        String uname = br.readLine();
+        UserDAO udo = new UserDAO();
+        User user = udo.getUser(uname);
+        
+        UserPlaylistDAO updo = new UserPlaylistDAO();
+        List<UserPlaylist> list = updo.getAllPlaylist(user);
+        if(list.isEmpty()){
+            System.out.println("No playlist present for the given user");
+            System.exit(0);
+        }
+        System.out.println("Available Playlist:");
+        System.out.printf("%-15s %s\n", "Name", "Created Date");
+        for(UserPlaylist p : list){
+            System.out.format("%-15s %s\n", p.getPlaylist().getName(), sdf.format(p.getPlaylist().getCreatedDate()));
+        }
+        
+        System.out.println("Enter the name of the playlist:");
+        String pname = br.readLine();
+        PlaylistDAO pdo = new PlaylistDAO();
+        Playlist playlist = pdo.getPlaylist(pname);
+        
+        UserPlaylist upal = new UserPlaylist(playlist,user);
+        boolean res = updo.deletePlaylist(upal);
+        if(res){
+            System.out.println("Playlist deleted successfully");
+           /* list = updo.getAllPlaylist(user);
+            if(list.isEmpty()){
+                System.out.println("No playlist present for the given user");
+                System.exit(0);
+            }
+            System.out.println("Available Playlist:");
+            System.out.printf("%-15s %s\n", "Name", "Created Date");
+            for(UserPlaylist p : list){
+                System.out.format("%-15s %s\n", p.getPlaylist().getName(), sdf.format(p.getPlaylist().getCreatedDate()));
+            }*/
+            
+        }
+        else{
+            System.out.println("Playlist not found");
+        }
+        
+        list = updo.getAllPlaylist(user);
+            if(list.isEmpty()){
+                System.out.println("No playlist present for the given user");
+                System.exit(0);
+            }
+            System.out.println("Available Playlist:");
+            System.out.printf("%-15s %s\n", "Name", "Created Date");
+            for(UserPlaylist p : list){
+                System.out.format("%-15s %s\n", p.getPlaylist().getName(), sdf.format(p.getPlaylist().getCreatedDate()));
+            }
+	}
+}
+
+#########################################################################################
+
+import java.util.*;
+
+public class Playlist {
+	long id;
+    String name;
+    Date created_date;
+    
+    Playlist(long id, String name, Date created_date){
+        this.id = id;
+        this.name = name;
+        this.created_date = created_date;
+    }
+    
+    public long getId(){
+        return this.id;
+    }
+    
+    public String getName(){
+        return this.name;
+    }
+    
+    public Date getCreatedDate(){
+        return this.created_date;   
+    }
+    
+}
+
+
+###############################################################################################
+
+import java.util.*;
+import java.sql.*;
+
+public class PlaylistDAO{
+    public Playlist getPlaylist(String name){
+        Playlist playlist = null;
+        
+        try{
+            DbConnection db = new DbConnection();
+            Connection con = db.getConnection();
+            PreparedStatement smt = con.prepareStatement("select * from playlist where name = ?");
+            smt.setString(1,name);
+            ResultSet rs = smt.executeQuery();
+            while(rs.next()){
+                java.util.Date d = rs.getDate(3);
+                playlist = new Playlist(rs.getLong(1), rs.getString(2), d);
+            }
+            
+            con.close();
+        }catch(Exception e){}
+        
+        return playlist;
+    }
+}
